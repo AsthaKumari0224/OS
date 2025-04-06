@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy-Efficient CPU Scheduling Algorithm</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #000000(295, 22%, 20%);
+            --secondary-color:#434e7d(172, 230, 239);
+            --accent-color: #371a08;
+            --text-color: #1c1a1a;
+            --card-background: #102e3c1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family:  'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif, 'Helvectica';
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color), var(--primary-color));
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .global-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        header {
+            background: linear-gradient(90deg, hsla(213, 48%, 30%, 0.902), #353a29e6);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px #4127274d;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header-content i {
+            font-size: 2.5rem;
+            color: var(--text-color);
+        }
+
+        .header-title {
+            font-size: 2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        nav {
+            background: linear-gradient(90deg, #12252fcc, #18242fcc);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(7, 41, 34, 0.2);
+            transform: scale(1.05);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        .section-container {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+            background: var(--card-background);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-container.active {
+            display: block;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: var(--text-color);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--text-color);
+        }
+
+        .screenshot-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .screenshot-item {
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot-item:hover {
+            transform: scale(1.05);
+        }
+
+        .screenshot-item img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+
+        .contributors {
+            display: center;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .contributor {
+            text-align: center;
+            padding: 15px;
+            background: rgba(80, 58, 58, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .contributor:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px #152f1133;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+            text-align: center;
+            padding: 20px 0;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header-title {
+                font-size: 1.5rem;
+            }
+
+            .section-container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="global-container header-content">
+            
+            <h1 class="header-title">Intelligent CPU Scheduling Simulator</h1>
+        </div>
+    </header>
+
+    <nav>
+        <div class="global-container nav-container">
+            <a href="#" class="nav-link active" onclick="showSection('home')">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="#" class="nav-link" onclick="showSection('about')">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+            <a href="#" class="nav-link" onclick="showSection('code')">
+                <i class="fas fa-code"></i> Code
+            </a>
+            <a href="#" class="nav-link" onclick="showSection('screenshots')">
+                <i class="fas fa-images"></i> Screenshots
+            </a>
+            <a href="#" class="nav-link" onclick="showSection('made_by')">
+                <i class="fas fa-users"></i> Made By
+            </a>
+        </div>
+    </nav>
+
+    <div class="global-container">
+        <section id="home" class="section-container active">
+            <h2 class="section-title">CPU Scheduling </h2>
+            <p>
+                A CPU Scheduler is a crucial part of an operating system that chooses which process should run next when several processes vie for CPU time. It facilitates effective multitasking, equitable resource allocation, and maximum system performance by employing scheduling algorithms such as FCFS, SJF, Round Robin, and Priority Scheduling. These algorithms ensure the minimum waiting time, turnaround time, and response time along with maximum CPU utilization and throughput. CPU scheduler plays a vital role in time-sharing systems to provide equitable execution of processes, in real-time systems to deliver stringent deadlines, and in cloud computing to allow dynamic allocation of resources between virtual machines. It efficiently allocates tasks in multi-core processors to increase performance and energy efficiency. With AI-powered optimizations, recent CPU schedulers are becoming adaptive, modifying the scheduling policy as a function of workload patterns for greater overall efficiency.
+
+            </section>
+
+        <section id="about" class="section-container">
+            <h2 class="section-title">Definition of CPU Scheduling</h2>
+            <p>A CPU Scheduling Simulator is a computer program that simulates and analyzes the way various CPU scheduling algorithms schedule process execution within an operating system. It enables users to comprehend, compare, and optimize scheduling methods such as FCFS, SJF, Round Robin, and Priority Scheduling by simulating the way processes are allocated CPU time. The simulator accepts inputs like arrival time, burst time, and priority, runs the scheduling algorithm, and gives important performance measures like waiting time, turnaround time, response time, and CPU utilization. Most simulators also give Gantt charts for graphical representation. These tools are extensively applied in education, research, and industry for testing scheduling efficiency, enhancing CPU performance, and designing improved scheduling strategies for practical applications, such as cloud computing, multi-core processors, and real-time systems.
+                </p>
+                <h2 class="section-title">Uses of CPU Scheduling</h2>
+                <p>
+                    A CPU Scheduling Simulator is widely used in education, research, and system development to analyze and optimize scheduling algorithms. In academics, it helps students understand scheduling techniques like FCFS, SJF, Round Robin, and Priority Scheduling by providing hands-on simulations and performance metrics such as waiting time, turnaround time, and CPU utilization. In research and development, it is used to test and refine new scheduling strategies before real-world implementation, improving CPU efficiency in real-time systems, cloud computing, and AI-driven applications. In cloud computing and virtualization, it helps optimize resource allocation among virtual machines (VMs), ensuring efficient CPU usage. In embedded and real-time systems, it guarantees timely execution of critical tasks in fields like medical devices and autonomous vehicles. Additionally, multi-core processors and gaming benefit from scheduling simulators to enhance performance and power efficiency. As operating systems evolve, these simulators remain essential for developing, testing, and refining scheduling strategies, ensuring optimal CPU performance.    
+                </p>
+                <h2 class="section-title">Why CPU Scheduling is important?</h2>
+                <p>
+                    CPU scheduling plays a critical role in system performance optimization, fair resource distribution, and enhanced overall efficiency. In the multitasking system, several processes vie for use of the CPU, and scheduling their order of execution to avoid bottlenecks and process starvation. In real-time systems, like medical equipment and autonomous cars, scheduling ensures timely completion of the critical tasks. In virtualization and cloud computing, it maximizes CPU resource sharing across many virtual machines to enhance throughput and efficiency. For mobile and embedded systems, scheduling optimizes between performance and power consumption, making the battery last longer. Furthermore, in AI, gaming, and high-performance computing, effective scheduling guarantees seamless processing, accelerated execution, and improved responsiveness. With multi-core and parallel processing, systems are becoming increasingly complex, and intelligent scheduling is all the more important to ensure system stability and optimal CPU utilization.
+
+                </p>
+                <h2 class="section-title">Algorithms for CPU Scheduling</h2>
+                <p>
+                    <h3>First Come First Serve(FCFS)</h3>
+                    First Come, First Serve (FCFS) is the most basic CPU scheduling algorithm that runs processes in the order they arrive in the ready queue. It is based on the FIFO (First-In, First-Out) rule, which implies that the first process to arrive in the queue is the first one to be executed by the CPU.
+                <br>
+                <br>
+
+                </p>
+                <p>
+                    <h3>Shortest Job First(SJF)</h3>
+                    Shortest Job First (SJF) is a CPU scheduling algorithm in which the process with the shortest burst time is run first. It is also referred to as Shortest Job Next (SJN) and works to optimize waiting time and increase system efficiency.
+                <br>
+                <br>
+                </p>
+                <p>
+                    <h3>Round Robin</h3>
+                    Round Robin (RR) is a preemptive CPU scheduling algorithm for time-sharing systems. A fixed time slice (known as a time quantum) is allotted to each process to run. If a process fails to complete in its time quantum, it is pushed to the back of the queue, and the next process runs. This process is repeated until all processes are finished.
+                 <br>
+                 <br>  
+                </p>
+                <p>
+                    <h3>Priority Scheduling</h3>
+                    Priority Scheduling is a CPU scheduling algorithm where each process is assigned a priority value, and the CPU executes the process with the highest priority first. If two processes have the same priority, they are scheduled based on First Come, First Serve (FCFS).
+
+
+                </p>
+                
+        </section>
+
+        <section id="code" class="section-container">
+            <h2 class="section-title">Implementation</h2>
+            <p>Comprehensive C implementation of advanced CPU scheduling algorithms.</p>
+            <pre><code>#include <stdio.h>
+                #include <stdlib.h>
+                
+                #define MAX_PROCESSES 10
+                
+                typedef struct {
+                    int pid;
+                    int arrival_time;
+                    int burst_time;
+                    int priority;
+                    int waiting_time;
+                    int turnaround_time;
+                    int remaining_time;
+                    int completion_time;
+                } Process;
+                
+                void sort_by_arrival(Process processes[], int n) {
+                    for (int i = 0; i < n - 1; i++) {
+                        for (int j = 0; j < n - i - 1; j++) {
+                            if (processes[j].arrival_time > processes[j + 1].arrival_time) {
+                                Process temp = processes[j];
+                                processes[j] = processes[j + 1];
+                                processes[j + 1] = temp;
+                            }
+                        }
+                    }
+                }
+                
+                void fcfs(Process processes[], int n) {
+                    sort_by_arrival(processes, n);
+                    int time = 0;
+                    printf("Gantt Chart: ");
+                    for (int i = 0; i < n; i++) {
+                        if (time < processes[i].arrival_time)
+                            time = processes[i].arrival_time;
+                        printf("| P%d (%d) ", processes[i].pid, time);
+                        time += processes[i].burst_time;
+                        processes[i].completion_time = time;
+                        processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
+                        processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
+                    }
+                    printf("|\n");
+                }
+                
+                void sjf(Process processes[], int n) {
+                    sort_by_arrival(processes, n);
+                    int completed = 0, time = 0;
+                    while (completed < n) {
+                        int min_index = -1;
+                        for (int i = 0; i < n; i++) {
+                            if (processes[i].arrival_time <= time && processes[i].remaining_time > 0) {
+                                if (min_index == -1 || processes[i].remaining_time < processes[min_index].remaining_time) {
+                                    min_index = i;
+                                }
+                            }
+                        }
+                        if (min_index == -1) {
+                            time++;
+                            continue;
+                        }
+                        printf("| P%d (%d) ", processes[min_index].pid, time);
+                        time += processes[min_index].remaining_time;
+                        processes[min_index].completion_time = time;
+                        processes[min_index].turnaround_time = processes[min_index].completion_time - processes[min_index].arrival_time;
+                        processes[min_index].waiting_time = processes[min_index].turnaround_time - processes[min_index].burst_time;
+                        processes[min_index].remaining_time = 0;
+                        completed++;
+                    }
+                    printf("|\n");
+                }
+                
+                void round_robin(Process processes[], int n, int quantum) {
+                    int time = 0, remaining = n;
+                    for (int i = 0; i < n; i++) {
+                        processes[i].remaining_time = processes[i].burst_time;
+                    }
+                    while (remaining > 0) {
+                        for (int i = 0; i < n; i++) {
+                            if (processes[i].remaining_time > 0) {
+                                printf("| P%d (%d) ", processes[i].pid, time);
+                                int exec_time = (processes[i].remaining_time > quantum) ? quantum : processes[i].remaining_time;
+                                processes[i].remaining_time -= exec_time;
+                                time += exec_time;
+                                if (processes[i].remaining_time == 0) {
+                                    processes[i].completion_time = time;
+                                    processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
+                                    processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
+                                    remaining--;
+                                }
+                            }
+                        }
+                    }
+                    printf("|\n");
+                }
+                
+                void priority_scheduling(Process processes[], int n) {
+                    sort_by_arrival(processes, n);
+                    int completed = 0, time = 0;
+                    while (completed < n) {
+                        int selected = -1;
+                        for (int i = 0; i < n; i++) {
+                            if (processes[i].arrival_time <= time && processes[i].remaining_time > 0) {
+                                if (selected == -1 || processes[i].priority < processes[selected].priority) {
+                                    selected = i;
+                                }
+                            }
+                        }
+                        if (selected == -1) {
+                            time++;
+                            continue;
+                        }
+                        printf("| P%d (%d) ", processes[selected].pid, time);
+                        time += processes[selected].remaining_time;
+                        processes[selected].completion_time = time;
+                        processes[selected].turnaround_time = processes[selected].completion_time - processes[selected].arrival_time;
+                        processes[selected].waiting_time = processes[selected].turnaround_time - processes[selected].burst_time;
+                        processes[selected].remaining_time = 0;
+                        completed++;
+                    }
+                    printf("|\n");
+                }
+                
+                void print_metrics(Process processes[], int n) {
+                    printf("\nProcess\tAT\tBT\tPriority\tWT\tTAT\n");
+                    for (int i = 0; i < n; i++) {
+                        printf("P%d\t%d\t%d\t%d\t%d\t%d\n", processes[i].pid, processes[i].arrival_time, processes[i].burst_time, processes[i].priority, processes[i].waiting_time, processes[i].turnaround_time);
+                    }
+                }
+                
+                int main() {
+                    int n, quantum, choice;
+                    Process processes[MAX_PROCESSES];
+                
+                    printf("Enter number of processes: ");
+                    scanf("%d", &n);
+                    
+                    printf("Enter Arrival Time, Burst Time, and Priority for each process:\n");
+                    for (int i = 0; i < n; i++) {
+                        processes[i].pid = i + 1;
+                        printf("P%d: ", processes[i].pid);
+                        scanf("%d %d %d", &processes[i].arrival_time, &processes[i].burst_time, &processes[i].priority);
+                        processes[i].remaining_time = processes[i].burst_time;
+                    }
+                
+                    printf("Select Scheduling Algorithm:\n1. FCFS\n2. SJF\n3. Round Robin\n4. Priority Scheduling\nChoice: ");
+                    scanf("%d", &choice);
+                
+                    if (choice == 3) {
+                        printf("Enter time quantum: ");
+                        scanf("%d", &quantum);
+                    }
+                    
+                    switch (choice) {
+                        case 1: fcfs(processes, n); break;
+                        case 2: sjf(processes, n); break;
+                        case 3: round_robin(processes, n, quantum); break;
+                        case 4: priority_scheduling(processes, n); break;
+                        default: printf("Invalid choice\n"); return 1;
+                    }
+                    
+                    print_metrics(processes, n);
+                    
+                    return 0;
+                }</code></pre>
+        </section>
+
+        <section id="screenshots" class="section-container">
+            <h2 class="section-title">Screenshots</h2>
+            <div class="screenshot-gallery">
+                <div class="screenshot-item">
+                    <img src="\Users\DELL\Pictures\Screenshots\Screenshot 2025-04-05 004441.png"alt="Screenshot 1">
+                </div>
+                <div class="screenshot-item">
+                    <img src="\Users\DELL\Pictures\Screenshots\Screenshot 2025-04-05 004146.png" alt="Screenshot 2">
+                </div>
+            </div>
+        </section>
+
+        <section id="made_by" class="section-container">
+            <h2 class="section-title">Project Contributors</h2>
+            <div class="contributors">
+                <div class="contributor">
+                    <h3>Astha Kumari</h3>
+                 
+                </div>
+                <div class="contributor">
+                    <h3>Ishita Chaudhary</h3>
+                    
+                </div>
+            </div>
+            <div class="contributor">
+                <h3>Sohan Priyadarshi Sahoo</h3>
+                
+            </div>
+        </div>
+        </section>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            // Remove active class from all sections and nav links
+            document.querySelectorAll('.section-container').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Add active class to selected section and nav link
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
