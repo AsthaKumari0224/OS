@@ -1,511 +1,433 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy-Efficient CPU Scheduling Algorithm</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #000000(295, 22%, 20%);
-            --secondary-color:#434e7d(172, 230, 239);
-            --accent-color: #371a08;
-            --text-color: #1c1a1a;
-            --card-background: #102e3c1a;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family:  'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif, 'Helvectica';
-            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color), var(--primary-color));
-            min-height: 100vh;
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-
-        .global-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        header {
-            background: linear-gradient(90deg, hsla(213, 48%, 30%, 0.902), #353a29e6);
-            padding: 20px 0;
-            text-align: center;
-            box-shadow: 0 4px 15px #4127274d;
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .header-content i {
-            font-size: 2.5rem;
-            color: var(--text-color);
-        }
-
-        .header-title {
-            font-size: 2rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
-        }
-
-        nav {
-            background: linear-gradient(90deg, #12252fcc, #18242fcc);
-            padding: 15px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 30px;
-        }
-
-        .nav-link {
-            color: var(--text-color);
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 600;
-            position: relative;
-            transition: all 0.3s ease;
-            padding: 10px 15px;
-            border-radius: 8px;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: rgba(7, 41, 34, 0.2);
-            transform: scale(1.05);
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 50%;
-            background-color: var(--text-color);
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover::after {
-            width: 100%;
-            left: 0;
-        }
-
-        .section-container {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
-            background: var(--card-background);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 30px 0;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .section-container.active {
-            display: block;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-            color: var(--text-color);
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 3px;
-            background: var(--text-color);
-        }
-
-        .screenshot-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .screenshot-item {
-            overflow: hidden;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease;
-        }
-
-        .screenshot-item:hover {
-            transform: scale(1.05);
-        }
-
-        .screenshot-item img {
-            width: 100%;
-            height: auto;
-            object-fit: cover;
-        }
-
-        .contributors {
-            display: center;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-
-        .contributor {
-            text-align: center;
-            padding: 15px;
-            background: rgba(80, 58, 58, 0.05);
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .contributor:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px #152f1133;
-        }
-
-        footer {
-            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
-            text-align: center;
-            padding: 20px 0;
-            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .header-title {
-                font-size: 1.5rem;
-            }
-
-            .section-container {
-                padding: 15px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CPU Scheduling Simulator</title>
+  <style>
+    body {
+      background-image: url('C:/Users/DELL/Pictures/Screenshots/Screenshot 2025-04-15 220814.png');
+      background-size: cover; /* Cover the entire viewport */
+      background-position: center; /* Center the image */
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background-color: #0e0e0e;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      color: #b76df1;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .tab {
+      margin: 5px;
+      padding: 10px 20px;
+      background-color: #b76df1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .tab:hover {
+      background-color: #b76df1;
+    }
+    .tab-content {
+      display: none;
+      margin-top: 20px;
+    }
+    .active {
+      display: block;
+    }
+    label, select, input, button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      text-align: center;
+      width: 80%;
+      max-width: 400px;
+      box-shadow: 0 0 10px #b76df1;
+    }
+    select, input {
+      background-color: #1c1c1c;
+      color: #fff;
+      border: 1px solid  #b76df1;
+    }
+    button {
+      background-color:  #b76df1;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color:  #b76df1;
+    }
+    table, th, td {
+      border: 1px solid  #b76df1;
+      border-collapse: collapse;
+      padding: 8px;
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+    }
+    th {
+      background-color: #34123a;
+      color: #fff;
+    }
+    td {
+      background-color: #1e1e1e;
+    }
+    #gantt {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .gantt-block {
+      padding: 10px;
+      margin: 3px;
+      background-color: #b76df1;
+      color: #fff;
+      border-radius: 5px;
+      min-width: 60px;
+      text-align: center;
+    }
+    .animation {
+      animation: fade-in 1.5s;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="global-container header-content">
-            
-            <h1 class="header-title">Intelligent CPU Scheduling Simulator</h1>
-        </div>
-    </header>
+  <h1 style="text-decoration: underline;">CPU Scheduling Simulator</h1>
+  <hr>
+  <div class="tabs">
+    <div class="tab" onclick="showTab('home')">Home</div>
+    <div class="tab" onclick="showTab('about')">About</div>
+    <div class="tab" onclick="showTab('algorithms')">Algorithms</div>
+    <div class="tab" onclick="showTab('simulator')">Simulator</div>
+    <div class="tab" onclick="showTab('team')">Team</div>
+  </div>
+  
 
-    <nav>
-        <div class="global-container nav-container">
-            <a href="#" class="nav-link active" onclick="showSection('home')">
-                <i class="fas fa-home"></i> Home
-            </a>
-            <a href="#" class="nav-link" onclick="showSection('about')">
-                <i class="fas fa-info-circle"></i> About
-            </a>
-            <a href="#" class="nav-link" onclick="showSection('code')">
-                <i class="fas fa-code"></i> Code
-            </a>
-            <a href="#" class="nav-link" onclick="showSection('screenshots')">
-                <i class="fas fa-images"></i> Screenshots
-            </a>
-            <a href="#" class="nav-link" onclick="showSection('made_by')">
-                <i class="fas fa-users"></i> Made By
-            </a>
-        </div>
-    </nav>
+  <div id="home" class="tab-content active animation"><br>
+    <br><h2 style="text-decoration: underline;">Welcome to CPU Scheduling Simulator</h2>
+    <p style="text-align:center;">
+      CPU scheduling is an important part of operating system structure that addresses the 
+      process of selecting processes out of the ready queue for CPU execution. In a multitasking or
+       multiprogramming system, several processes can be waiting for CPU time, and it is the scheduler that 
+       decides which process can utilize the CPU next. This is done through a number of CPU scheduling algorithms,
+        each with its own method of maximizing performance. The main objective of CPU scheduling is to achieve maximum 
+        CPU utilization while keeping parameters like waiting time, turnaround time, and response time to a minimum. Some of 
+        the most popular algorithms are First-Come, First-Served (FCFS), Shortest Job First (SJF), Round Robin (RR), 
+        and Priority Scheduling. These algorithms are either preemptive or non-preemptive based on whether they support
+         interruption of the running process or not. For instance, Round Robin is a preemptive algorithm that allocates a
+          fixed time quantum to each process to ensure fairness and responsiveness in time-sharing systems. FCFS is
+           non-preemptive and processes the jobs on arrival order, which may cause longer waiting time for short jobs.
+            Sophisticated techniques such as Multilevel Feedback Queue Scheduling learn from the process behavior, shifting 
+            priorities and queues dynamically in order to enhance system performance. Effective CPU scheduling prevents a process
+             from waiting perpetually (starvation avoidance) and also the system from responding rapidly to user input. It has a 
+             significant role to play in real-time systems where deadlines need to be met. In general, CPU scheduling has a 
+             strong impact on system throughput, efficiency, and user satisfaction, so it is one of the most critical activities 
+             of an operating system.
 
-    <div class="global-container">
-        <section id="home" class="section-container active">
-            <h2 class="section-title">CPU Scheduling </h2>
-            <p>
-                A CPU Scheduler is a crucial part of an operating system that chooses which process should run next when several processes vie for CPU time. It facilitates effective multitasking, equitable resource allocation, and maximum system performance by employing scheduling algorithms such as FCFS, SJF, Round Robin, and Priority Scheduling. These algorithms ensure the minimum waiting time, turnaround time, and response time along with maximum CPU utilization and throughput. CPU scheduler plays a vital role in time-sharing systems to provide equitable execution of processes, in real-time systems to deliver stringent deadlines, and in cloud computing to allow dynamic allocation of resources between virtual machines. It efficiently allocates tasks in multi-core processors to increase performance and energy efficiency. With AI-powered optimizations, recent CPU schedulers are becoming adaptive, modifying the scheduling policy as a function of workload patterns for greater overall efficiency.
+    </p>
+    <br>
+  
+   <br> <button onclick="showTab('simulator')">Start Simulation</button>
+  </div>
+  <br>
+  <div id="about" class="tab-content">
+    <h2><u>About CPU Scheduling Algorithm</u></h2>
+    <p style="text-align:center;">
+      <p style = "text-align:left;">
+        <strong><u>Benefits of CPU Scheduling Algorithms</u></strong><br>
+  <br>
+  
+  Enhanced CPU Utilization.<br>
+  Prevents the CPU from going idle for long, making the best use of it.<br>
+   
+  Effective Process Management.<br>
+  Effectively manages numerous processes, providing smooth multitasking within the system.<br>
+  Decreased Waiting and Turnaround Time.<br>
+  Algorithms such as SJF and SRTF reduce average waiting and turnaround times.<br>
+  Equal Distribution of Resources<br>
+  Algorithms such as Round Robin provide equal CPU time to each process, preventing starvation.<br>
+  Particularly in interactive systems, scheduling enhances user experience by reacting promptly to inputs.<br>
+  Sophisticated algorithms such as Multilevel Feedback Queue adapt according to process behavior and priorities.<br>
+  Priority-based scheduling guarantees critical or high-priority tasks first, which is crucial in real-time systems.<br>
+  Scheduling algorithms perform well even when the number of processes increases, making them ideal for contemporary, complex systems.<br>
+  </p>
+    </p><br><br>
+   <strong><u>Disadvantages of CPU Scheduling</strong></u><br><br>
+Complex Implementation.<br>
+Starvation of Low-Priority Processes.<br>
+Difficult to Predict Execution Time.<br>
+Overhead in Preemptive Scheduling.<br>
+Unfairness to Long Processes.<br>
+Time Quantum Selection Issues (in RR),<br>
+Waste of Resources in Inefficient Scheduling.<br>
+Not Applicable to all Systems.<br>
+Advanced algorithms like Multilevel Feedback Queue or Priority Scheduling can be difficult to implement and manage properly due to their dynamic nature.<br>
+In some algorithms (like Priority Scheduling), low-priority processes may wait indefinitely if higher-priority processes keep arriving.<br>
+Preemptive algorithms (like Round Robin or SRTF) require frequent context switches, which add overhead and reduce CPU efficiency.<br>
+Algorithms such as Shortest Job First (SJF) or Shortest Remaining Time First (SRTF) depend on knowing the burst time of processes, which is difficult to estimate exactly.<br>
+Certain algorithms prefer short processes, causing long waiting times for big or CPU-intensive processes.<br>
+If the time quantum is very small, it causes too much context switching; if the time quantum is large, the advantage of time-sharing is lost.<br>
 
-            </section>
+Poor scheduling can result in inefficient use of resources, longer waiting time, and reduced system capacity.<br>
+A scheduling algorithm suitable for interactive systems is not applicable to real-time or batch processing systems.<br>
+  </div>
 
-        <section id="about" class="section-container">
-            <h2 class="section-title">Definition of CPU Scheduling</h2>
-            <p>A CPU Scheduling Simulator is a computer program that simulates and analyzes the way various CPU scheduling algorithms schedule process execution within an operating system. It enables users to comprehend, compare, and optimize scheduling methods such as FCFS, SJF, Round Robin, and Priority Scheduling by simulating the way processes are allocated CPU time. The simulator accepts inputs like arrival time, burst time, and priority, runs the scheduling algorithm, and gives important performance measures like waiting time, turnaround time, response time, and CPU utilization. Most simulators also give Gantt charts for graphical representation. These tools are extensively applied in education, research, and industry for testing scheduling efficiency, enhancing CPU performance, and designing improved scheduling strategies for practical applications, such as cloud computing, multi-core processors, and real-time systems.
-                </p>
-                <h2 class="section-title">Uses of CPU Scheduling</h2>
-                <p>
-                    A CPU Scheduling Simulator is widely used in education, research, and system development to analyze and optimize scheduling algorithms. In academics, it helps students understand scheduling techniques like FCFS, SJF, Round Robin, and Priority Scheduling by providing hands-on simulations and performance metrics such as waiting time, turnaround time, and CPU utilization. In research and development, it is used to test and refine new scheduling strategies before real-world implementation, improving CPU efficiency in real-time systems, cloud computing, and AI-driven applications. In cloud computing and virtualization, it helps optimize resource allocation among virtual machines (VMs), ensuring efficient CPU usage. In embedded and real-time systems, it guarantees timely execution of critical tasks in fields like medical devices and autonomous vehicles. Additionally, multi-core processors and gaming benefit from scheduling simulators to enhance performance and power efficiency. As operating systems evolve, these simulators remain essential for developing, testing, and refining scheduling strategies, ensuring optimal CPU performance.    
-                </p>
-                <h2 class="section-title">Why CPU Scheduling is important?</h2>
-                <p>
-                    CPU scheduling plays a critical role in system performance optimization, fair resource distribution, and enhanced overall efficiency. In the multitasking system, several processes vie for use of the CPU, and scheduling their order of execution to avoid bottlenecks and process starvation. In real-time systems, like medical equipment and autonomous cars, scheduling ensures timely completion of the critical tasks. In virtualization and cloud computing, it maximizes CPU resource sharing across many virtual machines to enhance throughput and efficiency. For mobile and embedded systems, scheduling optimizes between performance and power consumption, making the battery last longer. Furthermore, in AI, gaming, and high-performance computing, effective scheduling guarantees seamless processing, accelerated execution, and improved responsiveness. With multi-core and parallel processing, systems are becoming increasingly complex, and intelligent scheduling is all the more important to ensure system stability and optimal CPU utilization.
+  <div id="algorithms" class="tab-content">
+    <h2><u>CPU Scheduling Algorithms</u></h2>
+    <ul style="text-align:center; list-style: none; padding: 0;">
+      <li><strong>FCFS:</strong> (First-Come, First-Served)</li>
 
-                </p>
-                <h2 class="section-title">Algorithms for CPU Scheduling</h2>
-                <p>
-                    <h3>First Come First Serve(FCFS)</h3>
-                    First Come, First Serve (FCFS) is the most basic CPU scheduling algorithm that runs processes in the order they arrive in the ready queue. It is based on the FIFO (First-In, First-Out) rule, which implies that the first process to arrive in the queue is the first one to be executed by the CPU.
-                <br>
-                <br>
+      <li><strong>SJF:</strong> (Shortest Job First (Non-Preemptive))</li>
+      <li><strong>SRTF:</strong> (Shortest Remaining Time First (Preemptive))</li>
+      <li><strong>Priority:</strong> (With and without Preemption)</li>
+      <li><strong>Round Robin:</strong> (Time-slice based scheduling)</li><br>
+      <hr>
+    </ul>
 
-                </p>
-                <p>
-                    <h3>Shortest Job First(SJF)</h3>
-                    Shortest Job First (SJF) is a CPU scheduling algorithm in which the process with the shortest burst time is run first. It is also referred to as Shortest Job Next (SJN) and works to optimize waiting time and increase system efficiency.
-                <br>
-                <br>
-                </p>
-                <p>
-                    <h3>Round Robin</h3>
-                    Round Robin (RR) is a preemptive CPU scheduling algorithm for time-sharing systems. A fixed time slice (known as a time quantum) is allotted to each process to run. If a process fails to complete in its time quantum, it is pushed to the back of the queue, and the next process runs. This process is repeated until all processes are finished.
-                 <br>
-                 <br>  
-                </p>
-                <p>
-                    <h3>Priority Scheduling</h3>
-                    Priority Scheduling is a CPU scheduling algorithm where each process is assigned a priority value, and the CPU executes the process with the highest priority first. If two processes have the same priority, they are scheduled based on First Come, First Serve (FCFS).
+    <li>
+      <Strong>
+        <u>The First Come First Serve (FCFS)</u></Strong><br> FCFS algorithm is one of the simplest CPU scheduling algorithms used in operating systems. It is a non-preemptive 
+        scheduling algorithm, meaning once a process starts executing, it runs to completion without being interrupted.<br>
+        <strong><br>
+          <u>Key Features:</u>
+        </strong><br>
+<strong>Order of Execution:</strong> In FCFS, the processes are executed in the order of their arrival in the ready queue. The first process to arrive will be executed first and so on.<br>
+
+<strong>Non-Preemptive:</strong> Once a process starts execution, it cannot be interrupted until it is completed. The next process in the queue will wait until the current process is finished.<br>
+
+<strong>Easy to Implement:</strong> FCFS is simple to implement since it has little system overhead. The scheduler merely selects the process at the front of the ready queue.<br>
+<br>
+<Strong><u>Advantages:</u></Strong><br>
+<strong>Simplicity:</strong> The algorithm is easy to comprehend and implement.<br>
+
+<strong>No Starvation:</strong> All processes are executed in the sequence they arrive, so no process will wait forever.<br>
+<br>
+<strong><u>Drawbacks:</u></strong><br>
+<strong>Convoy Effect:</strong>When a longer process arrives earlier than a shorter one, it makes the shorter process wait, resulting in ineffective use of the CPU and higher average waiting time.
+<br>
+<strong>High Average Waiting Time:</strong> Processes with shorter burst times can experience longer waiting times since they need to wait for all the earlier processes to finish.
+<br>
+<strong>No Priority Handling:</strong> FCFS does not consider the priority or duration of the process, which might result in bad performance for time-critical tasks.
+      <br><br><hr><br>
+    </li>
+
+    <li>
+      <strong><u>The Shortest Job First (SJF)</u></strong><br> SJF non-preemptive scheduling algorithm is a CPU scheduling strategy where the process with the shortest burst time is selected for execution next.
+       It is a non-preemptive algorithm, so once a process starts executing, it runs to completion without being interrupted.<br>
+       <br>
+       <strong><u>Key Features:</u></strong><br>
+<strong>Burst Time-Based:</strong> The shortest CPU burst time process is executed first.<br>
+
+<strong>Non-Preemptive:</strong> A process, once it begins execution, will not be interrupted until it completes.<br>
+
+<strong>Optimal for Waiting Time:</strong> Among all non-preemptive algorithms, SJF provides the least average waiting time, hence it is efficient in that regard.
+<br><br>
+<strong><u>Advantages:</u></strong><br>
+<strong>Minimum Average Waiting Time:</strong> SJF provides the optimal average waiting time among non-preemptive algorithms.
+<br>
+<strong>Efficient for Short Jobs:</strong> Suitable for batch systems where the jobs are of short duration.
+<br>
+<br>
+<strong><u>Drawbacks:</u></strong><br>
+<strong>Needs Burst Time Knowledge:</strong> The algorithm requires proper estimation or knowledge of burst time in advance, which is usually not feasible.
+
+<strong>Starvation:</strong> Longer processes never get an opportunity to execute if short jobs continue coming in, resulting in starvation of long tasks.
+<br>
+<strong>No Preemption:</strong> As it is non-preemptive, a long job may cause the execution of all other shorter jobs arriving after it to be delayed.
+<br><br><hr><br><br>
+    </li>
+
+    <li>
+      <strong><u>The Shortest Remaining Job First (SRJF)</u></strong><br> SRJF also known as Preemptive Shortest Job First (SJF) — is a preemptive CPU scheduling algorithm. It always selects the process with the 
+      shortest remaining burst time to execute next, even if a new process arrives with a shorter remaining time.<br>
+<br>
+      <strong><u>Key Features:</u></strong><br>
+<strong>Preemptive Form of SJF:</strong> SRJF is different from SJF (non-preemptive) in that it permits interrupting the ongoing process if a new process with less remaining time comes in.
+<br>
+<strong>Dynamic Decision Making:</strong> Decisions regarding scheduling are taken at the arrival of each new process.
+<br>
+<strong>Best Average Waiting Time:</strong> Similar to SJF, SRJF also gives the best average waiting time for a collection of processes.
+<br><br>
+ <strong><u>Advantages:</u></strong><br>
+<strong>Minimizes Average Waiting Time:</strong> Similar to SJF, but more responsive because of preemption.
+<br>
+<strong>Responsive to Short Jobs:</strong> Short jobs are executed rapidly, enhancing system response.
+<br><br>
+<strong><u>Disadvantages:</u></strong><br>
+<strong>Starvation:</strong> Long processes can suffer if short jobs continue to arrive.
+<br>
+<strong>Hard to Predict:</strong> Needs good knowledge of the remaining burst times, which is not always feasible.
+<br>
+<strong>More Overhead:</strong> More context switching because of preemption causes more overhead.
+<br><br><hr><br><br>
+    </li>
+    <li>
+    <strong><u>Priority Preemptive Scheduling</u></strong><br> 
+    Priority Preemptive Scheduling is a preemptive CPU scheduling algorithm where each process is assigned a priority, and the CPU is always assigned to the process with the highest priority (lower number = higher priority).
+     If a new process arrives with a higher priority than the currently running one, it preempts (interrupts) the current process.
+    <br><br>
+    <strong><u>How It Works?:</u></strong><br>
+Each process is assigned a priority value.<br>
+
+CPU is assigned to the process of highest priority.<br>
+
+When a process of higher priority comes in, it interrupts the running process and begins executing.<br>
+
+When the higher priority process completes, CPU is given back to the previously interrupted process.<br><br>
+
+<strong><u>Advantages:</u></strong><br>
+<strong>Fast Response for High-Priority Tasks:</strong> Critical or time-sensitive processes receive immediate access to CPU.
+<br>
+<strong>Better Control:</strong> Best suited for real-time and interactive systems.<br><br>
+
+<strong><u>Disadvantages:</u></strong><br>
+<strong>Starvation:</strong> Low-priority jobs can never run if high-priority jobs keep coming.
+<br>
+<strong>More Context Switching:</strong> More interrupts mean more overhead.
+<br>
+<strong>Needs Aging Mechanism:</strong> In order to avoid starvation, older jobs can be given higher priority over time (aging).
+<br><br><hr><br><br>
+     
+      
+    </li>
+<li>
+  <strong><u>Priority Non-Preemptive Scheduling</u></strong> <br>
+Priority Non-Preemptive Scheduling is a CPU scheduling algorithm in which every process 
+is given a priority, and the CPU is assigned to the highest-priority process. When two processes possess equal priority,
+ scheduling occurs according to their arrival time (FCFS). In the non-preemptive form, the process once initiated cannot be 
+ terminated till completion.<br><br>
+
+<strong><u>How It Works:</u></strong><br>
+Each process is assigned a priority (lower number = higher priority, or vice versa by convention).<br>
+
+The scheduler chooses the highest-priority process out of those that have arrived and are ready.<br>
+
+The chosen process executes to completion.<br>
+
+The next highest-priority process is chosen after that.<br><br>
+
+<strong><u>Key Points:</u></strong><br>
+Non-preemptive: A process, once started, cannot be interrupted.<br>
+
+Starvation possible: Low-priority processes may wait forever.<br>
+
+Efficient for systems where task priority is more important than responsiveness.<br><br>
+
+<strong><u>Advantages:</u></strong><br>
+Easy to use and simple to implement.<br>
+
+When some tasks are more significant than others.<br><br>
+
+<strong><u>Disadvantages:</u></strong><br>
+Starvation of low-priority processes.<br>
+
+Inappropriate for interactive systems where quick response is critical.<br>
+<br>
+<hr><br><br>
 
 
-                </p>
-                
-        </section>
+</li>
+<li>
+  <strong><u>Round Robin Algorithm</u></strong> <br>
+The Round Robin (RR) scheduling algorithm is one of the easiest and most popular CPU scheduling algorithms in operating systems. It is highly effective in time-sharing systems.
+<br><br>
+<strong><u>Important Features:</u></strong><br>
+<strong>Preemptive Algorithm:</strong> Every process is allocated a predetermined time slice or quantum.
+ If a process does not finish the allocated time, it's preempted and moved to the rear of the ready queue.
+<br>
+<strong>Fairness:</strong> All processes receive an equal amount of the CPU in cyclic order.
+<br>
+<strong>Efficient for Short Tasks:</strong> It is good for processes having the same burst times.
+<br><br>
+<strong><u>How it Works:</u></strong><br>
+All the processes are kept in a queue (FIFO).<br>
 
-        <section id="code" class="section-container">
-            <h2 class="section-title">Implementation</h2>
-            <p>Comprehensive C implementation of advanced CPU scheduling algorithms.</p>
-            <pre><code>#include <stdio.h>
-                #include <stdlib.h>
-                
-                #define MAX_PROCESSES 10
-                
-                typedef struct {
-                    int pid;
-                    int arrival_time;
-                    int burst_time;
-                    int priority;
-                    int waiting_time;
-                    int turnaround_time;
-                    int remaining_time;
-                    int completion_time;
-                } Process;
-                
-                void sort_by_arrival(Process processes[], int n) {
-                    for (int i = 0; i < n - 1; i++) {
-                        for (int j = 0; j < n - i - 1; j++) {
-                            if (processes[j].arrival_time > processes[j + 1].arrival_time) {
-                                Process temp = processes[j];
-                                processes[j] = processes[j + 1];
-                                processes[j + 1] = temp;
-                            }
-                        }
-                    }
-                }
-                
-                void fcfs(Process processes[], int n) {
-                    sort_by_arrival(processes, n);
-                    int time = 0;
-                    printf("Gantt Chart: ");
-                    for (int i = 0; i < n; i++) {
-                        if (time < processes[i].arrival_time)
-                            time = processes[i].arrival_time;
-                        printf("| P%d (%d) ", processes[i].pid, time);
-                        time += processes[i].burst_time;
-                        processes[i].completion_time = time;
-                        processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
-                        processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
-                    }
-                    printf("|\n");
-                }
-                
-                void sjf(Process processes[], int n) {
-                    sort_by_arrival(processes, n);
-                    int completed = 0, time = 0;
-                    while (completed < n) {
-                        int min_index = -1;
-                        for (int i = 0; i < n; i++) {
-                            if (processes[i].arrival_time <= time && processes[i].remaining_time > 0) {
-                                if (min_index == -1 || processes[i].remaining_time < processes[min_index].remaining_time) {
-                                    min_index = i;
-                                }
-                            }
-                        }
-                        if (min_index == -1) {
-                            time++;
-                            continue;
-                        }
-                        printf("| P%d (%d) ", processes[min_index].pid, time);
-                        time += processes[min_index].remaining_time;
-                        processes[min_index].completion_time = time;
-                        processes[min_index].turnaround_time = processes[min_index].completion_time - processes[min_index].arrival_time;
-                        processes[min_index].waiting_time = processes[min_index].turnaround_time - processes[min_index].burst_time;
-                        processes[min_index].remaining_time = 0;
-                        completed++;
-                    }
-                    printf("|\n");
-                }
-                
-                void round_robin(Process processes[], int n, int quantum) {
-                    int time = 0, remaining = n;
-                    for (int i = 0; i < n; i++) {
-                        processes[i].remaining_time = processes[i].burst_time;
-                    }
-                    while (remaining > 0) {
-                        for (int i = 0; i < n; i++) {
-                            if (processes[i].remaining_time > 0) {
-                                printf("| P%d (%d) ", processes[i].pid, time);
-                                int exec_time = (processes[i].remaining_time > quantum) ? quantum : processes[i].remaining_time;
-                                processes[i].remaining_time -= exec_time;
-                                time += exec_time;
-                                if (processes[i].remaining_time == 0) {
-                                    processes[i].completion_time = time;
-                                    processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
-                                    processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
-                                    remaining--;
-                                }
-                            }
-                        }
-                    }
-                    printf("|\n");
-                }
-                
-                void priority_scheduling(Process processes[], int n) {
-                    sort_by_arrival(processes, n);
-                    int completed = 0, time = 0;
-                    while (completed < n) {
-                        int selected = -1;
-                        for (int i = 0; i < n; i++) {
-                            if (processes[i].arrival_time <= time && processes[i].remaining_time > 0) {
-                                if (selected == -1 || processes[i].priority < processes[selected].priority) {
-                                    selected = i;
-                                }
-                            }
-                        }
-                        if (selected == -1) {
-                            time++;
-                            continue;
-                        }
-                        printf("| P%d (%d) ", processes[selected].pid, time);
-                        time += processes[selected].remaining_time;
-                        processes[selected].completion_time = time;
-                        processes[selected].turnaround_time = processes[selected].completion_time - processes[selected].arrival_time;
-                        processes[selected].waiting_time = processes[selected].turnaround_time - processes[selected].burst_time;
-                        processes[selected].remaining_time = 0;
-                        completed++;
-                    }
-                    printf("|\n");
-                }
-                
-                void print_metrics(Process processes[], int n) {
-                    printf("\nProcess\tAT\tBT\tPriority\tWT\tTAT\n");
-                    for (int i = 0; i < n; i++) {
-                        printf("P%d\t%d\t%d\t%d\t%d\t%d\n", processes[i].pid, processes[i].arrival_time, processes[i].burst_time, processes[i].priority, processes[i].waiting_time, processes[i].turnaround_time);
-                    }
-                }
-                
-                int main() {
-                    int n, quantum, choice;
-                    Process processes[MAX_PROCESSES];
-                
-                    printf("Enter number of processes: ");
-                    scanf("%d", &n);
-                    
-                    printf("Enter Arrival Time, Burst Time, and Priority for each process:\n");
-                    for (int i = 0; i < n; i++) {
-                        processes[i].pid = i + 1;
-                        printf("P%d: ", processes[i].pid);
-                        scanf("%d %d %d", &processes[i].arrival_time, &processes[i].burst_time, &processes[i].priority);
-                        processes[i].remaining_time = processes[i].burst_time;
-                    }
-                
-                    printf("Select Scheduling Algorithm:\n1. FCFS\n2. SJF\n3. Round Robin\n4. Priority Scheduling\nChoice: ");
-                    scanf("%d", &choice);
-                
-                    if (choice == 3) {
-                        printf("Enter time quantum: ");
-                        scanf("%d", &quantum);
-                    }
-                    
-                    switch (choice) {
-                        case 1: fcfs(processes, n); break;
-                        case 2: sjf(processes, n); break;
-                        case 3: round_robin(processes, n, quantum); break;
-                        case 4: priority_scheduling(processes, n); break;
-                        default: printf("Invalid choice\n"); return 1;
-                    }
-                    
-                    print_metrics(processes, n);
-                    
-                    return 0;
-                }</code></pre>
-        </section>
+The CPU selects the first process and executes it for the specified time quantum.<br>
 
-        <section id="screenshots" class="section-container">
-            <h2 class="section-title">Screenshots</h2>
-            <div class="screenshot-gallery">
-                <div class="screenshot-item">
-                    <img src="\Users\DELL\Pictures\Screenshots\Screenshot 2025-04-05 004441.png"alt="Screenshot 1">
-                </div>
-                <div class="screenshot-item">
-                    <img src="\Users\DELL\Pictures\Screenshots\Screenshot 2025-04-05 004146.png" alt="Screenshot 2">
-                </div>
-            </div>
-        </section>
+If the process completes earlier than the time quantum, it exits the queue.<br>
 
-        <section id="made_by" class="section-container">
-            <h2 class="section-title">Project Contributors</h2>
-            <div class="contributors">
-                <div class="contributor">
-                    <h3>Astha Kumari</h3>
-                 
-                </div>
-                <div class="contributor">
-                    <h3>Ishita Chaudhary</h3>
-                    
-                </div>
-            </div>
-            <div class="contributor">
-                <h3>Sohan Priyadarshi Sahoo</h3>
-                
-            </div>
-        </div>
-        </section>
-    </div>
+If not, it's shifted to the end of the queue and the next process is run.<br><br>
 
-    <script>
-        function showSection(sectionId) {
-            // Remove active class from all sections and nav links
-            document.querySelectorAll('.section-container').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
+<strong><u>Advantages:</u></strong><br>
+Avoids starvation.<br>
 
-            // Add active class to selected section and nav link
-            document.getElementById(sectionId).classList.add('active');
-            event.target.classList.add('active');
-        }
-    </script>
-</body>
-</html>
+Easy to implement and simple.<br>
+
+Ideal for interactive systems.<br><br>
+
+<strong><u>Disadvantages:</u></strong><br>
+Too small a time quantum → too many context switches (overhead).<br>
+
+Too large a quantum → acts like FCFS (less responsive).<br>
+
+</li>
+  </div>
+
+  <div id="simulator" class="tab-content">
+    <h2><u>Simulator</u></h2>
+    <label for="algorithm">Select Algorithm:</label>
+    <select id="algorithm">
+      <option value="FCFS">FCFS</option>
+      <option value="SJF">SJF (Non-Preemptive)</option>
+      <option value="SRTF">SJF (Preemptive)</option>
+      <option value="Priority">Priority (Non-Preemptive)</option>
+      <option value="PriorityP">Priority (Preemptive)</option>
+      <option value="RR">Round Robin</option>
+    </select>
+
+    <label for="quantum">Quantum (for RR only):</label>
+    <input type="number" id="quantum" value="2" min="1" />
+
+    <label for="numProcesses">Number of Processes:</label>
+    <input type="number" id="numProcesses" placeholder="Enter number of processes" min="1" />
+    <button onclick="createProcessTable()">Create Process Table</button>
+
+    <h3>Enter Process Details</h3>
+    <table id="processTable">
+      <thead>
+        <tr>
+          <th>PID</th>
+          <th>Arrival</th>
+          <th>Burst</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button onclick="simulate()">Run Simulation</button>
+
+    <div id="gantt"></div>
+    <div id="output"></div>
+  </div>
+
+  <div id="team" class="tab-content">
+    <h2><u>Meet the Team</u></h2>
+    <p style="text-align:center;">This simulator is proudly developed by:</p>
+    <ul style="text-align:center; list-style: none;">
+      <li>Astha Kumari</li>
+      <li>Ishita Choudhary</li>
+      <li>Sohan Priyadarshi Saho</li>
+    </ul>
+  </div>
